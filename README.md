@@ -1,5 +1,5 @@
 # TuBA
-TuBA - Tunable Biclustering Algorithm for gene expression datasets is a graph-based unsupervised biclustering algorithm, customized to identify alterations in tumors. It is based on the hypothesis that gene pairs relevant to an alteration associated with dysregulated gene expression share a statistically significant number of extremal samples. TuBA has been developed in the Khiabanian Lab by Amartya Singh and Dr. Hossein Khiabanian.
+TuBA - *Tunable Biclustering Algorithm* for gene expression datasets is a graph-based unsupervised biclustering algorithm, customized to identify alterations in tumors. It is based on the hypothesis that gene pairs relevant to an alteration associated with dysregulated gene expression share a statistically significant number of extremal samples. TuBA has been developed in the [Khiabanian Lab](http://khiabanian-lab.org/) by Amartya Singh and Dr. Hossein Khiabanian.
 
 ## INSTRUCTIONS FOR USING TuBA’s CODE
 
