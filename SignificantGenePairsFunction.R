@@ -1,5 +1,5 @@
 #Function that generates p-values
-SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
+SignificantGenePairsFunction <- function(InputFileName,PercentileCutOff,highORlow)
 {
   df <- read.table(InputFileName,header = T,sep = ",")
   Non.Zero.Genes <- as.character(df$Gene.ID)
