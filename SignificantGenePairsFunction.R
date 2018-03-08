@@ -116,64 +116,68 @@ SignificantGenePairsFunction <- function(InputFileName,PercentileCutOff,highORlo
     #Improved version of enrichment for special cases
     Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
-    p.values.List.More.Zeros <- vector(mode = "list",length = length(Genes.With.Less.Samples))
-    for (i in 1:length(p.values.List.More.Zeros))
+    #If genes with 0 expression values exist
+    if (length(Genes.With.Less.Samples) != 0)
     {
-      p.val.Overlaps.Temp <- rep(1,length = length(Temp.Overlaps.Vec))
-      TempI <- Genes.With.Less.Samples[i]
-      for (j in 1:length(Temp.Overlaps.Vec))
+      p.values.List.More.Zeros <- vector(mode = "list",length = length(Genes.With.Less.Samples))
+      for (i in 1:length(p.values.List.More.Zeros))
       {
+        p.val.Overlaps.Temp <- rep(1,length = length(Temp.Overlaps.Vec))
+        TempI <- Genes.With.Less.Samples[i]
+        for (j in 1:length(Temp.Overlaps.Vec))
+        {
         
-        m.1.1 <- Temp.Overlaps.Vec[j]
-        m.1.2 <- length(List.OutlierSamples.SerNos[[TempI]]) - m.1.1
-        m.2.1 <- ceiling(CutOffPerc*length(Sample.IDs)) - m.1.1
-        m.2.2 <- Lengths.Non.Zero.Samples[TempI] - (m.1.1+m.1.2+m.2.1)
-        m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
-        if (m.2.2 >=0 & m.1.1>=0 & m.1.2 >=0 & m.2.1 >=0)
-        {
-          p.val.Overlaps.Temp[j] <- fisher.test(m,alternative = "g")$p.value
+          m.1.1 <- Temp.Overlaps.Vec[j]
+          m.1.2 <- length(List.OutlierSamples.SerNos[[TempI]]) - m.1.1
+          m.2.1 <- ceiling(CutOffPerc*length(Sample.IDs)) - m.1.1
+          m.2.2 <- Lengths.Non.Zero.Samples[TempI] - (m.1.1+m.1.2+m.2.1)
+          m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
+          if (m.2.2 >=0 & m.1.1>=0 & m.1.2 >=0 & m.2.1 >=0)
+          {
+            p.val.Overlaps.Temp[j] <- fisher.test(m,alternative = "g")$p.value
+          }
         }
+        p.values.List.More.Zeros[[i]] <- p.val.Overlaps.Temp
       }
-      p.values.List.More.Zeros[[i]] <- p.val.Overlaps.Temp
-    }
     
     
-    for (i in 1:length(Genes.With.Less.Samples))
-    {
-      TempI <- Genes.With.Less.Samples[i]
-      p.val.Overlaps.Row.Temp <- p.values.Overlaps.Matrix[TempI,]
-      p.val.Overlaps.Column.Temp <- p.values.Overlaps.Matrix[,TempI]
-      for (j in 1:length(Temp.Overlaps.Vec))
+      for (i in 1:length(Genes.With.Less.Samples))
       {
-        if (length(which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])) !=0)
+        TempI <- Genes.With.Less.Samples[i]
+        p.val.Overlaps.Row.Temp <- p.values.Overlaps.Matrix[TempI,]
+        p.val.Overlaps.Column.Temp <- p.values.Overlaps.Matrix[,TempI]
+        for (j in 1:length(Temp.Overlaps.Vec))
         {
-          p.val.Overlaps.Row.Temp[which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
+          if (length(which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])) !=0)
+          {
+            p.val.Overlaps.Row.Temp[which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
+          }
+          if (length(which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])) !=0)
+          {
+            p.val.Overlaps.Column.Temp[which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
+          }
         }
-        if (length(which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])) !=0)
-        {
-          p.val.Overlaps.Column.Temp[which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
-        }
+        p.values.Overlaps.Matrix[TempI,] <- p.val.Overlaps.Row.Temp
+        p.values.Overlaps.Matrix[,TempI] <- p.val.Overlaps.Column.Temp
       }
-      p.values.Overlaps.Matrix[TempI,] <- p.val.Overlaps.Row.Temp
-      p.values.Overlaps.Matrix[,TempI] <- p.val.Overlaps.Column.Temp
-    }
     
-    Combn.Genes <- combn(Genes.With.Less.Samples,2)
+      Combn.Genes <- combn(Genes.With.Less.Samples,2)
     
-    Sample.Ser.Nos <- seq(1,length(Sample.IDs),1)
+      Sample.Ser.Nos <- seq(1,length(Sample.IDs),1)
     
-    for (i in 1:ncol(Combn.Genes))
-    {
-      TempI <- Combn.Genes[1,i]
-      TempJ <- Combn.Genes[2,i]
-      m.1.1 <- SampleOverlaps.Matrix[TempI,TempJ]
-      m.1.2 <- length(List.OutlierSamples.SerNos[[TempI]][!List.OutlierSamples.SerNos[[TempI]] %in% List.OutlierSamples.SerNos[[TempJ]]])
-      m.2.1 <- length(List.OutlierSamples.SerNos[[TempJ]][!List.OutlierSamples.SerNos[[TempJ]] %in% List.OutlierSamples.SerNos[[TempI]]])
-      Temp.Vec <- c(TempI,TempJ)
-      Min.Ser.No <- which(c(Lengths.Non.Zero.Samples[TempI],Lengths.Non.Zero.Samples[TempJ]) == min(c(Lengths.Non.Zero.Samples[TempI],Lengths.Non.Zero.Samples[TempJ])))[1]
-      m.2.2 <- length(List.of.Ser.Nos.of.Non.Zero.Samples[[Temp.Vec[Min.Ser.No]]][!List.of.Ser.Nos.of.Non.Zero.Samples[[Temp.Vec[Min.Ser.No]]] %in% union(List.OutlierSamples.SerNos[[TempI]],List.OutlierSamples.SerNos[[TempJ]])])
-      m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
-      p.values.Overlaps.Matrix[TempI,TempJ] <- fisher.test(m,alternative = "g")$p.value
+      for (i in 1:ncol(Combn.Genes))
+      {
+        TempI <- Combn.Genes[1,i]
+        TempJ <- Combn.Genes[2,i]
+        m.1.1 <- SampleOverlaps.Matrix[TempI,TempJ]
+        m.1.2 <- length(List.OutlierSamples.SerNos[[TempI]][!List.OutlierSamples.SerNos[[TempI]] %in% List.OutlierSamples.SerNos[[TempJ]]])
+        m.2.1 <- length(List.OutlierSamples.SerNos[[TempJ]][!List.OutlierSamples.SerNos[[TempJ]] %in% List.OutlierSamples.SerNos[[TempI]]])
+        Temp.Vec <- c(TempI,TempJ)
+        Min.Ser.No <- which(c(Lengths.Non.Zero.Samples[TempI],Lengths.Non.Zero.Samples[TempJ]) == min(c(Lengths.Non.Zero.Samples[TempI],Lengths.Non.Zero.Samples[TempJ])))[1]
+        m.2.2 <- length(List.of.Ser.Nos.of.Non.Zero.Samples[[Temp.Vec[Min.Ser.No]]][!List.of.Ser.Nos.of.Non.Zero.Samples[[Temp.Vec[Min.Ser.No]]] %in% union(List.OutlierSamples.SerNos[[TempI]],List.OutlierSamples.SerNos[[TempJ]])])
+        m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
+        p.values.Overlaps.Matrix[TempI,TempJ] <- fisher.test(m,alternative = "g")$p.value
+      }
     }
     
     p.values.Overlaps.Matrix[lower.tri(p.values.Overlaps.Matrix,diag = T)] <- -1
@@ -365,6 +369,7 @@ SignificantGenePairsFunction <- function(InputFileName,PercentileCutOff,highORlo
     
     Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
+    
     p.val.Overlaps <- vector(mode = "numeric",length = length(Temp.Overlaps.Vec))
     for (i in 1:length(Temp.Overlaps.Vec))
     {
@@ -387,62 +392,66 @@ SignificantGenePairsFunction <- function(InputFileName,PercentileCutOff,highORlo
     #Improved version of enrichment for special cases
     Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
-    p.values.List.More.Zeros <- vector(mode = "list",length = length(Genes.With.More.Zero.Samples))
-    for (i in 1:length(p.values.List.More.Zeros))
+    #If genes with more 0 expression values than percentile cutoff exist
+    if (length(Genes.With.More.Zero.Samples) != 0)
     {
-      p.val.Overlaps.Temp <- rep(1,length = length(Temp.Overlaps.Vec))
-      TempI <- Genes.With.More.Zero.Samples[i]
-      for (j in 1:length(Temp.Overlaps.Vec))
+      p.values.List.More.Zeros <- vector(mode = "list",length = length(Genes.With.More.Zero.Samples))
+      for (i in 1:length(p.values.List.More.Zeros))
       {
+        p.val.Overlaps.Temp <- rep(1,length = length(Temp.Overlaps.Vec))
+        TempI <- Genes.With.More.Zero.Samples[i]
+        for (j in 1:length(Temp.Overlaps.Vec))
+        {
         
-        m.1.1 <- Temp.Overlaps.Vec[j]
-        m.1.2 <- Lengths.Zero.Samples[TempI] - m.1.1
-        m.2.1 <- ceiling(CutOffPerc*length(Sample.IDs)) - m.1.1
-        m.2.2 <- length(Sample.IDs) - (m.1.1+m.1.2+m.2.1)
-        m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
-        if (m.2.2 >0 & (m.1.1+m.1.2+m.2.1+m.2.2) == length(Sample.IDs))
-        {
-          p.val.Overlaps.Temp[j] <- fisher.test(m,alternative = "g")$p.value
+          m.1.1 <- Temp.Overlaps.Vec[j]
+          m.1.2 <- Lengths.Zero.Samples[TempI] - m.1.1
+          m.2.1 <- ceiling(CutOffPerc*length(Sample.IDs)) - m.1.1
+          m.2.2 <- length(Sample.IDs) - (m.1.1+m.1.2+m.2.1)
+          m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
+          if (m.2.2 >0 & (m.1.1+m.1.2+m.2.1+m.2.2) == length(Sample.IDs))
+          {
+            p.val.Overlaps.Temp[j] <- fisher.test(m,alternative = "g")$p.value
+          }
         }
+        p.values.List.More.Zeros[[i]] <- p.val.Overlaps.Temp
       }
-      p.values.List.More.Zeros[[i]] <- p.val.Overlaps.Temp
-    }
     
     
-    for (i in 1:length(Genes.With.More.Zero.Samples))
-    {
-      TempI <- Genes.With.More.Zero.Samples[i]
-      p.val.Overlaps.Row.Temp <- p.values.Overlaps.Matrix[TempI,]
-      p.val.Overlaps.Column.Temp <- p.values.Overlaps.Matrix[,TempI]
-      for (j in 1:length(Temp.Overlaps.Vec))
+      for (i in 1:length(Genes.With.More.Zero.Samples))
       {
-        if (length(which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])) !=0)
+        TempI <- Genes.With.More.Zero.Samples[i]
+        p.val.Overlaps.Row.Temp <- p.values.Overlaps.Matrix[TempI,]
+        p.val.Overlaps.Column.Temp <- p.values.Overlaps.Matrix[,TempI]
+        for (j in 1:length(Temp.Overlaps.Vec))
         {
-          p.val.Overlaps.Row.Temp[which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
+          if (length(which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])) !=0)
+          {
+            p.val.Overlaps.Row.Temp[which(SampleOverlaps.Matrix[TempI,] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
+          }
+          if (length(which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])) !=0)
+          {
+            p.val.Overlaps.Column.Temp[which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
+          }
         }
-        if (length(which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])) !=0)
-        {
-          p.val.Overlaps.Column.Temp[which(SampleOverlaps.Matrix[,TempI] == Temp.Overlaps.Vec[j])] <- p.values.List.More.Zeros[[i]][j]
-        }
+        p.values.Overlaps.Matrix[TempI,] <- p.val.Overlaps.Row.Temp
+        p.values.Overlaps.Matrix[,TempI] <- p.val.Overlaps.Column.Temp
       }
-      p.values.Overlaps.Matrix[TempI,] <- p.val.Overlaps.Row.Temp
-      p.values.Overlaps.Matrix[,TempI] <- p.val.Overlaps.Column.Temp
-    }
     
-    Combn.Genes <- combn(Genes.With.More.Zero.Samples,2)
+      Combn.Genes <- combn(Genes.With.More.Zero.Samples,2)
     
-    Sample.Ser.Nos <- seq(1,length(Sample.IDs),1)
+      Sample.Ser.Nos <- seq(1,length(Sample.IDs),1)
     
-    for (i in 1:ncol(Combn.Genes))
-    {
-      TempI <- Combn.Genes[1,i]
-      TempJ <- Combn.Genes[2,i]
-      m.1.1 <- SampleOverlaps.Matrix[TempI,TempJ]
-      m.1.2 <- length(List.OutlierSamples.SerNos[[TempI]][!List.OutlierSamples.SerNos[[TempI]] %in% List.OutlierSamples.SerNos[[TempJ]]])
-      m.2.1 <- length(List.OutlierSamples.SerNos[[TempJ]][!List.OutlierSamples.SerNos[[TempJ]] %in% List.OutlierSamples.SerNos[[TempI]]])
-      m.2.2 <- length(Sample.Ser.Nos[!Sample.Ser.Nos %in% union(List.OutlierSamples.SerNos[[TempI]],List.OutlierSamples.SerNos[[TempJ]])])
-      m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
-      p.values.Overlaps.Matrix[TempI,TempJ] <- fisher.test(m,alternative = "g")$p.value
+      for (i in 1:ncol(Combn.Genes))
+      {
+        TempI <- Combn.Genes[1,i]
+        TempJ <- Combn.Genes[2,i]
+        m.1.1 <- SampleOverlaps.Matrix[TempI,TempJ]
+        m.1.2 <- length(List.OutlierSamples.SerNos[[TempI]][!List.OutlierSamples.SerNos[[TempI]] %in% List.OutlierSamples.SerNos[[TempJ]]])
+        m.2.1 <- length(List.OutlierSamples.SerNos[[TempJ]][!List.OutlierSamples.SerNos[[TempJ]] %in% List.OutlierSamples.SerNos[[TempI]]])
+        m.2.2 <- length(Sample.Ser.Nos[!Sample.Ser.Nos %in% union(List.OutlierSamples.SerNos[[TempI]],List.OutlierSamples.SerNos[[TempJ]])])
+        m <- matrix(c(m.1.1,m.1.2,m.2.1,m.2.2),byrow = T,nrow = 2)
+        p.values.Overlaps.Matrix[TempI,TempJ] <- fisher.test(m,alternative = "g")$p.value
+      }
     }
     
     p.values.Overlaps.Matrix[lower.tri(p.values.Overlaps.Matrix,diag = T)] <- -1
@@ -563,5 +572,5 @@ SignificantGenePairsFunction <- function(InputFileName,PercentileCutOff,highORlo
   }
 }
 
-
+#SignificantGenePairsFunction(InputFileName = "TCGA_PAAD_Primary_Cleaned.csv", PercentileCutOff = 10, highORlow = "h")
 
