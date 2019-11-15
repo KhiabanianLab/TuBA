@@ -285,11 +285,11 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
     colnames(x3) <- c("Node1","Node2")
     
     Common.List.Vec <- c(x3$Node1,x3$Node2)
-    while (length(which(count(Common.List.Vec)$freq <2)) > 0)
+    while (length(which(plyr::count(Common.List.Vec)$freq <2)) > 0)
     {
       Common.List.Vec <- c(x3$Node1,x3$Node2)
       
-      Vec.of.Leaves <- count(Common.List.Vec)$x[which(count(Common.List.Vec)$freq < 2)]
+      Vec.of.Leaves <- plyr::count(Common.List.Vec)$x[which(plyr::count(Common.List.Vec)$freq < 2)]
       
       x3 <- data.frame(x3$Node1[!x3$Node1 %in% Vec.of.Leaves & !x3$Node2 %in% Vec.of.Leaves],x3$Node2[!x3$Node1 %in% Vec.of.Leaves & !x3$Node2 %in% Vec.of.Leaves])
       colnames(x3) <- c("Node1","Node2")
@@ -319,8 +319,8 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
     TempI <- TempI + Lengths.Edgelist.x3[i]
     Temp.Gene.Table.Col1 <- x4$Node1[k:TempI]
     Temp.Gene.Table.Col2 <- x4$Node2[k:TempI]
-    List.of.Genes.Per.Bicluster[[i]] <- count(c(Temp.Gene.Table.Col1,Temp.Gene.Table.Col2))$x
-    Degrees.of.Genes.In.Biclusters[[i]] <- count(c(Temp.Gene.Table.Col1,Temp.Gene.Table.Col2))$freq
+    List.of.Genes.Per.Bicluster[[i]] <- plyr::count(c(Temp.Gene.Table.Col1,Temp.Gene.Table.Col2))$x
+    Degrees.of.Genes.In.Biclusters[[i]] <- plyr::count(c(Temp.Gene.Table.Col1,Temp.Gene.Table.Col2))$freq
     Bicluster.Nos.List[[i]] <- rep(i,length(List.of.Genes.Per.Bicluster[[i]]))
     Temp.List.of.Samples.Per.Bicluster <- vector(mode = "list")
     for (j in 1:Lengths.Edgelist.x3[i])
@@ -378,5 +378,3 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
   write.table(Edgelist.df,file = File.Name,row.names = F,col.names = T,sep = ",")
   
 }
-
-BiclusteringFunction(FileNameGenePairs = "PRAD_PrimaryTumors_Cleaned_L0.05_SignificantGenePairs.csv",FileNameBinaryMatrix = "PRAD_PrimaryTumors_Cleaned_L0.05_Genes_Samples_BinaryMatrix.csv",OverlapCutOff = 15)
