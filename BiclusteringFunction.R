@@ -9,8 +9,10 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
   SignificanceLevel <- 10^(-OverlapCutOff)
   
   Gene.Pairs.df <- fread(FileNameGenePairs)
+  colnames(Gene.Pairs.df) <- c("Gene.1","Gene.2","p.val")
   
   Genes.Samples.Binary.df <- fread(FileNameBinaryMatrix)
+  colnames(Genes.Samples.Binary.df) <- c("Gene.ID",colnames(Genes.Samples.Binary.df[,-1]))
   
   Non.Zero.Genes <- as.character(Genes.Samples.Binary.df$Gene.ID)
   
@@ -119,6 +121,19 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
     k <- k+1
   }
   
+  #Code to prepare file that contains list of genes per cluster
+  List.Cluster.Nos <- vector(mode = "list",length = length(List.of.Genes.In.Clusters))
+  for (i in 1:length(List.of.Genes.In.Clusters))
+  {
+    List.Cluster.Nos[[i]] <- rep(i,length(List.of.Genes.In.Clusters[[i]]))
+  }
+  
+  Genes.In.Clusters.df <- data.frame(unlist(List.Cluster.Nos),Non.Zero.Genes[unlist(List.of.Genes.In.Clusters)])
+  colnames(Genes.In.Clusters.df) <- c("Cluster.No","Gene.ID")
+  
+  File.Name <- as.character(paste(gsub("SignificantGenePairs.csv","",FileNameGenePairs),"OverlapCutOff",toupper(as.character(SignificanceLevel)),"_GenesInClusters.csv",sep = ""))
+  
+  write.table(Genes.In.Clusters.df,file = File.Name,row.names = F,col.names = T,sep = ",")
   
   #Code to find seeds in the clusters
   
@@ -357,7 +372,7 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
   
   write.table(Genes.Degrees.Bicluster.df,file = File.Name,row.names = F,col.names = T,sep = ",")
   
-  #Edgelist
+  #Edgelists for biclusters
   Vec.Edgelist.Bicluster.Labels <- vector(mode = "numeric")
   for (i in 1:length(Lengths.Edgelist.x3))
   {
