@@ -129,9 +129,9 @@ BiclusteringFunction <- function(FileNameGenePairs,FileNameBinaryMatrix,OverlapC
   }
   
   Genes.In.Clusters.df <- data.frame(unlist(List.Cluster.Nos),Non.Zero.Genes[unlist(List.of.Genes.In.Clusters)])
-  colnames(Genes.In.Clusters.df) <- c("Cluster.No","Gene.ID")
+  colnames(Genes.In.Clusters.df) <- c("Network.No","Gene.ID")
   
-  File.Name <- as.character(paste(gsub("SignificantGenePairs.csv","",FileNameGenePairs),"OverlapCutOff",toupper(as.character(SignificanceLevel)),"_GenesInClusters.csv",sep = ""))
+  File.Name <- as.character(paste(gsub("SignificantGenePairs.csv","",FileNameGenePairs),"OverlapCutOff",toupper(as.character(SignificanceLevel)),"_GenesWithinNetworks.csv",sep = ""))
   
   write.table(Genes.In.Clusters.df,file = File.Name,row.names = F,col.names = T,sep = ",")
   
