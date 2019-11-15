@@ -1,7 +1,8 @@
-#Function that generates p-values
 SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
 {
-  df <- read.table(InputFileName,header = T,sep = ",")
+  library(data.table)
+  df <- fread(InputFileName)
+  colnames(df) <- c("Gene.ID",colnames(df)[-1])
   Non.Zero.Genes <- as.character(df$Gene.ID)
   Exprs.Matrix <- as.matrix(df[,-1])
   Sample.IDs <- gsub(".","-",colnames(df)[-1],fixed = T)
@@ -12,7 +13,7 @@ SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
   #Matrix that contains the order of the samples in increasing order of expression for all genes
   Sample.Order.Increasing.Matrix <- t(apply(Exprs.Matrix,1,order))
   
-  #
+  #Find gene-pairs with significant overlaps between their percentile sets
   if (highORlow == "h" | highORlow == "H" | highORlow == "high" | highORlow == "High") {
     Start.Index <- ncol(Exprs.Matrix) - (ceiling(CutOffPerc*ncol(Exprs.Matrix))) +1
     
@@ -85,7 +86,7 @@ SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
     
     rm(Sample.Order.Increasing.Matrix)
     
-    #Fisher exact for overlaps
+    #Hypergeometric test for overlaps (with alternative hypothesis that overlap is greater)
     
     Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
@@ -107,7 +108,7 @@ SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
       p.values.Overlaps.Matrix[call] <- p.val.Overlaps[i]
     }
     
-    #Enrichments for special cases
+    #p-vals for special cases
     if (length(Genes.With.Less.Samples) != 0) {
       Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
@@ -382,7 +383,7 @@ SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
     SampleOverlaps.Matrix <- Binary.Matrix.For.Genes.Outliers %*% t(Binary.Matrix.For.Genes.Outliers)
     SampleOverlaps.Matrix[lower.tri(SampleOverlaps.Matrix,diag = T)] <- -1
     
-    #Fisher exact for overlaps
+    #Hypergeometric test for overlaps (with alternative hypothesis that overlap is greater)
     
     Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
@@ -404,7 +405,7 @@ SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
       p.values.Overlaps.Matrix[call] <- p.val.Overlaps[i]
     }
     
-    #Enrichment for special cases
+    #p-vals for special cases
     if (length(Genes.With.More.Zero.Samples) != 0) {
       Temp.Overlaps.Vec <- seq(0,ceiling(CutOffPerc*length(Sample.IDs)))
     
@@ -593,6 +594,3 @@ SignificantGenePairs <- function(InputFileName,PercentileCutOff,highORlow)
   }
   
 }  
-
-SignificantGenePairs(InputFileName = "UCEC_PrimaryTumors_Cleaned.csv",PercentileCutOff = 10, highORlow = "l")
-
