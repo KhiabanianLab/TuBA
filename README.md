@@ -9,7 +9,7 @@ It is recommended that the code for TuBA be run on a machine with at least 16GB 
 
 ## 2. Packages Required
 
-The following packages have been utilized in TuBA’s Code: data.table, plyr and igraph.
+The following packages have been utilized in TuBA’s R functions: data.table, plyr and igraph.
 
 They can be installed by using the following commands in R:
 
