@@ -1,19 +1,17 @@
-#Function to clean input file - takes in gene expression input file with genes along rows and samples along columns with no NAs
 DatasetPreparationFunction <- function(InputFileName)
 {
   library(data.table)
   df <- fread(InputFileName)
-  Gene.IDs <- df[,1]
+  colnames(df) <- c("Gene.ID",colnames(df)[-1])
+  Gene.IDs <- df$Gene.ID
   Exprs.Matrix <- as.matrix(df[,-1])
   Sample.IDs <- colnames(df)[-1]
   Sums.of.Rows <- apply(Exprs.Matrix,1,sum)
-  if (length(which(Sums.of.Rows == 0)) != 0)
-  {
-    Exprs.Matrix <- Exprs.Matrix[-which(Sums.of.Rows == 0),]
-    Non.Zero.Genes <- Gene.IDs[-which(Sums.of.Rows == 0)]
+  if (length(which(Sums.of.Rows == 0 | is.na(Sums.of.Rows) == T)) != 0) {
+    Exprs.Matrix <- Exprs.Matrix[-which(Sums.of.Rows == 0 | is.na(Sums.of.Rows) == T),]
+    Non.Zero.Genes <- Gene.IDs[-which(Sums.of.Rows == 0 | is.na(Sums.of.Rows) == T)]
   }
-  else
-  {
+  else {
     Non.Zero.Genes <- Gene.IDs
   }
   
