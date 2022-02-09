@@ -25,7 +25,7 @@ install.packages("devtools",dependencies = T)
 ```
 Once **devtools** is installed, run the following to install **TuBA**:
 ```
-devtools::install_github("Amartya101/TuBA")
+devtools::install_github("KhiabanianLab/TuBA")
 ```
 
 
