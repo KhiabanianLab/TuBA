@@ -31,7 +31,7 @@ devtools::install_github("Amartya101/TuBA")
 
 ## Instructions for using TuBA
 
-There are 3 functions in TuBA, which need to be employed in a sequential manner on the data set of interest. Make sure before running the first function (*DataCleaning*) that the data exists in a tabular format (either a .csv or a .txt file), in which the genes (or more generally, features) are along the rows and the samples are along the columns. The first column in the file must contain the IDs or names of the genes (no duplicates allowed). We have included an example file with RP genes in the [ToyExamples](https://github.com/Amartya101/ToyExamples) repository (*RPGenes.csv*) for reference. 
+There are 3 functions in TuBA, which need to be employed in a sequential manner on the data set of interest. Make sure before running the first function (*DataCleaning*) that the data exists in a tabular format (either a .csv or a .txt file), in which the genes (or more generally, features) are along the rows and the samples are along the columns. The first column in the file must contain the IDs or names of the genes (no duplicates allowed). We have included an example file with RP genes in the [ToyExamples](https://github.com/Amartya101/ToyExamples) repository ("*RPGenes.csv*") for reference. 
 
 The descriptions of the functions and instructions on how to use them are provided below:
 
